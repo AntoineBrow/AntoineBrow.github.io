@@ -10,104 +10,142 @@
 	</head>
 
 <body>
-	<nav>
-    		<ul>
-        		<li><a href="/">Home</a></li>
-	        	<li><a href="/about">About</a></li>
-        		<li><a href="/cv">CV</a></li>
-        		<li><a href="/blog">Blog</a></li>
-    		</ul>
-		</nav>
-		<div class="container">
-    		<div class="blurb">
-        		<h1>Hi there, I'm Hank Quinlan!</h1>
-				<p>I'm best known as the horrible cop from <em>A Touch of Evil</em> Don't trust me. <a href="/about">Read more about my life...</a></p>
-    		</div><!-- /.blurb -->
-		</div><!-- /.container -->
-		<footer>
-    		<ul>
-        		<li><a href="mailto:hankquinlanhub@gmail.com">email</a></li>
-        		<li><a href="https://github.com/hankquinlan">github.com/hankquinlan</a></li>
-			</ul>
-		</footer>
-	
-	
-<script src="//d3js.org/d3.v3.min.js"></script>
+<h1>Dépenses/Revenus</h1>
+
+<table class="NaN">
+  <tbody><tr>
+    <th></th>
+    <th>2014</th>
+    <th>2015</th>
+  </tr>
+  <tr>
+    <td>Value A</td>
+    <td style="background-size: 10% 100%; transition-delay: 0.05s;">2</td>
+    <td style="background-size: 40% 100%; transition-delay: 0.05s;">8</td>
+  </tr>
+  <tr>
+    <td>Value B</td>
+    <td style="background-size: 15% 100%; transition-delay: 0.1s;">3</td>
+    <td style="background-size: 45% 100%; transition-delay: 0.1s;">9</td>
+  </tr>
+  <tr>
+    <td>Value C</td>
+    <td style="background-size: 35% 100%; transition-delay: 0.15s;">7</td>
+    <td style="background-size: 55% 100%; transition-delay: 0.15s;">11</td>
+  </tr>
+  <tr>
+    <td>Value D</td>
+    <td style="background-size: 50% 100%; transition-delay: 0.2s;">10</td>
+    <td style="background-size: 45% 100%; transition-delay: 0.2s;">9</td>
+  </tr>
+  <tr>
+    <td>Value E</td>
+    <td style="background-size: 45% 100%; transition-delay: 0.25s;">9</td>
+    <td style="background-size: 50% 100%; transition-delay: 0.25s;">10</td>
+  </tr>
+  <tr>
+    <td>Value F</td>
+    <td style="background-size: 55% 100%; transition-delay: 0.3s;">11</td>
+    <td style="background-size: 50% 100%; transition-delay: 0.3s;">10</td>
+  </tr>
+  <tr>
+    <td>Value G</td>
+    <td style="background-size: 75% 100%; transition-delay: 0.35s;">15</td>
+    <td style="background-size: 45% 100%; transition-delay: 0.35s;">9</td>
+  </tr>
+  <tr>
+    <td>Value H</td>
+    <td style="background-size: 90% 100%; transition-delay: 0.4s;">18</td>
+    <td style="background-size: 50% 100%; transition-delay: 0.4s;">10</td>
+  </tr>
+  <tr>
+    <td>Value I</td>
+    <td style="background-size: 85% 100%; transition-delay: 0.45s;">17</td>
+    <td style="background-size: 55% 100%; transition-delay: 0.45s;">11</td>
+  </tr>
+  <tr>
+    <td>Value J</td>
+    <td style="background-size: 100% 100%; transition-delay: 0.5s;">20</td>
+    <td style="background-size: 60% 100%; transition-delay: 0.5s;">12</td>
+  </tr>
+</tbody></table>
 <script>
+var twoColComp = {
+  init: function (){
+    var tables = document.getElementsByTagName('table');
 
-var width = 960,
-    height = 500;
+    // for each table
+    for(var i = 0; i < tables.length; i++) {
+      // don't process one that's already been done (has class two-column-comp)
+      if (new RegExp('(^| )two-column-comp( |$)', 'gi').test(tables[i].className)){
+         return;
+      }
 
-var nodes = d3.range(200).map(function() { return {radius: Math.random() * 12 + 4}; }),
-    root = nodes[0],
-    color = d3.scale.category10();
+      //TODO: need to verify cross-browser support of these vars
+      var h = tables[i].clientHeight, 
+          t = tables[i].getBoundingClientRect().top,
+          wT = window.pageYOffset || document.documentElement.scrollTop,
+          wH = window.innerHeight;
 
-root.radius = 0;
-root.fixed = true;
+      if(wT + wH > t + h/2){
+         this.make(tables[i]);
+       }
+    }
+  },
+  
+  make : function(el){
+    var rows = el.getElementsByTagName('tr'),
+        vals = [],
+        max,
+        percent;
 
-var force = d3.layout.force()
-    .gravity(0.05)
-    .charge(function(d, i) { return i ? 0 : -2000; })
-    .nodes(nodes)
-    .size([width, height]);
-
-force.start();
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-svg.selectAll("circle")
-    .data(nodes.slice(1))
-  .enter().append("circle")
-    .attr("r", function(d) { return d.radius; })
-    .style("fill", function(d, i) { return color(i % 3); });
-
-force.on("tick", function(e) {
-  var q = d3.geom.quadtree(nodes),
-      i = 0,
-      n = nodes.length;
-
-  while (++i < n) q.visit(collide(nodes[i]));
-
-  svg.selectAll("circle")
-      .attr("cx", function(d) { return d.x; })
-      .attr("cy", function(d) { return d.y; });
-});
-
-svg.on("mousemove", function() {
-  var p1 = d3.mouse(this);
-  root.px = p1[0];
-  root.py = p1[1];
-  force.resume();
-});
-
-function collide(node) {
-  var r = node.radius + 16,
-      nx1 = node.x - r,
-      nx2 = node.x + r,
-      ny1 = node.y - r,
-      ny2 = node.y + r;
-  return function(quad, x1, y1, x2, y2) {
-    if (quad.point && (quad.point !== node)) {
-      var x = node.x - quad.point.x,
-          y = node.y - quad.point.y,
-          l = Math.sqrt(x * x + y * y),
-          r = node.radius + quad.point.radius;
-      if (l < r) {
-        l = (l - r) / l * .5;
-        node.x -= x *= l;
-        node.y -= y *= l;
-        quad.point.x += x;
-        quad.point.y += y;
+    // for each row in the table, get vals
+    for(var x = 0; x < rows.length; x++) {
+      var cells = rows[x].getElementsByTagName('td');
+      for(var y = 1; y < cells.length; y++){
+        vals.push(parseInt(cells[y].innerHTML, 10));
       }
     }
-    return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-  };
+
+    max = Math.max.apply( Math, vals );
+    percent = 100/max;
+
+    //for each row in the table, apply vals
+    for(x = 0; x < rows.length; x++) {
+      var cells = rows[x].getElementsByTagName('td');
+      for(var y = 1; y < cells.length; y++){
+        var currNum = parseInt(cells[y].innerHTML, 10);
+        cells[y].style.backgroundSize = percent * currNum + "% 100%";
+        cells[y].style.transitionDelay = x/20 + "s";
+      } 
+    }
+    //add a class so you don't process it a bunch of times
+    el.className =+ " two-column-comp"
+  } // end make
 }
 
+window.onload = function(){
+  twoColComp.init();
+}
+
+window.onscroll = function(){
+  twoColComp.init();
+}
 </script>
-	
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-46156385-1', 'cssscript.com');
+  ga('send', 'pageview');
+
+</script>
+
+
+<iframe id="google_osd_static_frame_859153306216" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;"></iframe></body>
 
 </html>
 
